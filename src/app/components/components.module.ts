@@ -5,6 +5,7 @@ import { MaterialModule } from '../shared/material/material/material.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CarTableComponent } from './car-table/car-table.component';
 import { NavBarComponent } from './nav-bar/nav-bar.component';
+import { EmptyCardComponent } from './empty-card/empty-card.component';
 
 
 
@@ -12,7 +13,8 @@ import { NavBarComponent } from './nav-bar/nav-bar.component';
   declarations: [
     NewCarDialogComponent,
     CarTableComponent,
-    NavBarComponent
+    NavBarComponent,
+    EmptyCardComponent
   ],
   imports: [
     CommonModule,
@@ -21,7 +23,8 @@ import { NavBarComponent } from './nav-bar/nav-bar.component';
   ],
   exports:[
     NavBarComponent,
-    CarTableComponent
+    CarTableComponent,
+    EmptyCardComponent,
   ]
 })
 export class ComponentsModule { }

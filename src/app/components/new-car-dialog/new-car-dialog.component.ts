@@ -4,7 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { Car } from '../../models/car.model';
 import { CarService } from '../../services/car.service';
-import Swal from 'sweetalert2';
+import { NotificationsService } from 'src/app/services/notifications.service';
 
 
 @Component({
@@ -42,6 +42,7 @@ export class NewCarDialogComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private carService:CarService,
+    private notifService:NotificationsService,
     public dialogRef: MatDialogRef<NewCarDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
@@ -56,8 +57,6 @@ export class NewCarDialogComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.suscriptions.unsubscribe();
   }
-
-
 
   private _openForm(): void{
     if (this.data) {
@@ -101,49 +100,11 @@ export class NewCarDialogComponent implements OnInit, OnDestroy {
         (car) => car._id === newCar._id
       );
       this.suscriptions.add(
-        this.carService.modifyCar(newCar).subscribe({
-          next: (resp) => {
-            this.localCarList[carIndex] = { ...newCar };
-            this.carService.carsList.next(this.localCarList);
-            Swal.fire({
-              icon: 'success',
-              title: 'Car modification has been saved',
-              showConfirmButton: false,
-              timer: 1500,
-            });
-            this.newCarForm.reset();
-          },
-          error: (error) => {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: `Patent: ${newCar.patent} already exists`,
-            });
-          }
-        })
+        this._modifyCar(newCar, carIndex)
       )
     }else{
       this.suscriptions.add(
-        this.carService.addNewCar(newCar).subscribe({
-          next: (resp) => {
-            this.localCarList.push(resp.car)
-            this.carService.carsList.next(this.localCarList);
-            Swal.fire({
-              icon: 'success',
-              title: 'Car has been saved',
-              showConfirmButton: false,
-              timer: 1500,
-            });
-            this.newCarForm.reset();
-          },
-          error: ({error}) => {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: `${error.errors[0].msg}`,
-            });
-          }
-        })
+        this._createNewCar(newCar)
       )
     }
     this.localCarList.length >= 1
@@ -151,6 +112,38 @@ export class NewCarDialogComponent implements OnInit, OnDestroy {
       : this.carService.isCarsListEmpty.next(true);
   }
 
+  private _modifyCar(car:Car, index:number): Subscription{
+    return this.carService.modifyCar(car).subscribe({
+      next: () => {
+        this.localCarList[index] = { ...car };
+        this.carService.carsList.next(this.localCarList);
+        this.notifService.showSucessAlert('Car modification has been saved');
+        this.newCarForm.reset();
+      },
+      error: () => {
+        this.notifService.showErrorAlert(
+          `Patent: ${car.patent} already exists`
+        );
+      },
+    });
+  }
+
+  private _createNewCar(car:Car):Subscription{
+    return this.carService.addNewCar(car).subscribe({
+      next: (resp) => {
+        if(this.localCarList.length==0){
+          this.carService.isCarsListEmpty.next(false);
+        }
+        this.localCarList.push(resp.car)
+        this.carService.carsList.next(this.localCarList);
+        this.notifService.showSucessAlert('Car has been saved');
+        this.newCarForm.reset();
+      },
+      error: ({error}) => {
+        this.notifService.showErrorAlert(`${error.errors[0].msg}`);
+      }
+    });
+  }
   
 
   onNoClick() {

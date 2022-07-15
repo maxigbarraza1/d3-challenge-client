@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -9,6 +9,8 @@ import { CarService } from '../../services/car.service';
 import { NewCarDialogComponent } from '../new-car-dialog/new-car-dialog.component';
 
 import Swal from 'sweetalert2';
+import { NotificationsService } from 'src/app/services/notifications.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -16,17 +18,22 @@ import Swal from 'sweetalert2';
   templateUrl: './car-table.component.html',
   styleUrls: ['./car-table.component.sass'],
 })
-export class CarTableComponent implements OnInit {
+export class CarTableComponent implements OnInit, OnDestroy {
+
   carsList: Car[] = [];
+
+  suscriptions!:Subscription;
 
   displayedColumns: string[] = ['brand', 'model', 'color', 'patent', 'actions'];
   dataSource: MatTableDataSource<Car> = new MatTableDataSource(this.carsList);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private carService: CarService, private dialog: MatDialog) {}
+  constructor(  private carService: CarService,
+                private notifService: NotificationsService,
+                private dialog: MatDialog) {}
 
   ngOnInit(): void {
-    this.carService.carsList.subscribe((cars) => {
+    this.suscriptions = this.carService.carsList.subscribe((cars) => {
       this.carsList = cars;
       this.carsList.length >= 1
         ? this.carService.isCarsListEmpty.next(false)
@@ -36,38 +43,30 @@ export class CarTableComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.suscriptions.unsubscribe();
+  }
+
   deleteCar(carID: string) {
     const car = this.carsList.find((car) => car._id === carID);
     if (car) {
-      this.carService.removeCar(car._id!).subscribe((data) => {
-        this.carsList.splice(
-          this.carsList.map((car) => car._id).indexOf(carID),
-          1
-        );
-        this.carsList.length >= 1
-          ? this.carService.isCarsListEmpty.next(false)
-          : this.carService.isCarsListEmpty.next(true);
-        this.carService.carsList.next(this.carsList);
-      });
+      this.suscriptions.add(
+        this.carService.removeCar(car._id!).subscribe((data) => {
+          this.carsList.splice(
+            this.carsList.map((car) => car._id).indexOf(carID),
+            1
+          );
+          this.carsList.length >= 1
+            ? this.carService.isCarsListEmpty.next(false)
+            : this.carService.isCarsListEmpty.next(true);
+          this.carService.carsList.next(this.carsList);
+        })
+      )
     }
   }
 
   showDeleteAlert(car:Car):void{
-    Swal.fire({
-      title: 'Are you sure?',
-      html:
-        `<strong>You trying to delete</strong> <br>` +
-        `Car: <b>${car.brand} ${car.model}</b> <br>` +
-        `Patent: <b>${car.patent}</b> <br>` +
-        `Color: <b>${car.color}</b> <br>` +
-        `<p>You won't be able to revert this</p>`,
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!',
-    }).then((result) => {
+    this.notifService.showDeleteAlert(car).then((result) => {
       if (result.isConfirmed) {
         this.deleteCar(car._id!);
         Swal.fire('Deleted!', 'Car selected has been deleted.', 'success');

@@ -19,7 +19,9 @@
             <ng-container *ngIf="!(isCarListEmpty | async); else carListEmpty">
                 <app-car-table></app-car-table>
             </ng-container>
-            <ng-template #carListEmpty> <p>no hay nada</p> </ng-template>
+            <ng-template #carListEmpty>
+                <app-empty-card></app-empty-card>
+            </ng-template>
         </div>
     </div>
 </div>
