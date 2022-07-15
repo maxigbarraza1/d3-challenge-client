@@ -1,0 +1,43 @@
+<div class="table-container" tabindex="0">
+    <table mat-table matSort [dataSource]="dataSource">
+        <ng-container matColumnDef="brand">
+            <th mat-header-cell *matHeaderCellDef> Brand </th>
+            <td mat-cell *matCellDef="let car"> {{car.brand}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="model">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef> Model </th>
+            <td mat-cell *matCellDef="let car"> {{car.model}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="color">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef> Color </th>
+            <td mat-cell *matCellDef="let car"> {{car.color}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="patent">
+            <th mat-header-cell *matHeaderCellDef> Patent </th>
+            <td mat-cell *matCellDef="let car"> {{car.patent}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> Actions </th>
+            <td mat-cell *matCellDef="let car">
+                <div class="buttons-container">
+                    <button mat-icon-button color="primary" (click)="openDialog(car)">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="showDeleteAlert(car)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns; sticky : true"></tr>
+    </table>
+    <div class="paginator-container mat-paginator-sticky ">
+        <mat-paginator class="" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of cars"></mat-paginator>
+    </div>
+</div>

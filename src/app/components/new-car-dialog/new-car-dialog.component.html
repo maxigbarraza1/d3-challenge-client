@@ -1,0 +1,56 @@
+<div class="container">
+    <h2 mat-dialog-title class="title">Add new car</h2>
+    <div mat-dialog-content class="mat-dialog-content">
+        <form (ngSubmit)="saveCar()" [formGroup]="newCarForm">
+            <div class="form-container">
+                <mat-form-field appearance="outline">
+                    <mat-label>Brand</mat-label>
+                    <input  matInput 
+                            placeholder="Ford"
+                            formControlName="brand">
+                    <mat-error *ngIf="validateFields('brand')">{{getErrorMessage('brand')}}</mat-error>
+                </mat-form-field>
+    
+                <mat-form-field appearance="outline">
+                    <mat-label>Model</mat-label>
+                    <input  matInput 
+                            placeholder="Mustang"
+                            formControlName="model">
+                    <mat-error *ngIf="validateFields('model')">{{getErrorMessage('model')}}</mat-error>
+                </mat-form-field>
+    
+                <mat-form-field appearance="outline">
+                    <mat-label>Color</mat-label>
+                    <input  matInput 
+                            placeholder="Red"
+                            formControlName="color">
+                    <mat-error *ngIf="validateFields('color')">{{getErrorMessage('color')}}</mat-error>
+                </mat-form-field>
+    
+                <mat-form-field appearance="outline">
+                    <mat-label>Patent</mat-label>
+                    <input  matInput 
+                            placeholder="ABC-123"
+                            formControlName="patent">
+                    <mat-error *ngIf="validateFields('patent')">{{getErrorMessage('patent')}}</mat-error>
+                </mat-form-field>
+            </div>
+        </form>
+    </div>
+    <div mat-dialog-actions class="mat-dialog-actions">
+        <button mat-button 
+                mat-raised-button color="warn" 
+                (click)="onNoClick()">
+                Close
+        </button>
+
+        <button mat-button 
+                mat-raised-button color="primary" 
+                type="submit" 
+                (click)="saveCar()"
+                [disabled]="newCarForm.invalid">
+                Save car
+        </button>
+    </div>
+
+</div>
