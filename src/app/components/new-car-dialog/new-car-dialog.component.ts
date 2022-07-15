@@ -4,6 +4,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { Car } from '../../models/car.model';
 import { CarService } from '../../services/car.service';
+import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-new-car-dialog',
@@ -99,24 +101,57 @@ export class NewCarDialogComponent implements OnInit, OnDestroy {
         (car) => car._id === newCar._id
       );
       this.suscriptions.add(
-        this.carService.modifyCar(newCar).subscribe((resp) => {
-          this.localCarList[carIndex] = { ...newCar };
-          this.carService.carsList.next(this.localCarList);
+        this.carService.modifyCar(newCar).subscribe({
+          next: (resp) => {
+            this.localCarList[carIndex] = { ...newCar };
+            this.carService.carsList.next(this.localCarList);
+            Swal.fire({
+              icon: 'success',
+              title: 'Car modification has been saved',
+              showConfirmButton: false,
+              timer: 1500,
+            });
+            this.newCarForm.reset();
+          },
+          error: (error) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: `Patent: ${newCar.patent} already exists`,
+            });
+          }
         })
       )
     }else{
       this.suscriptions.add(
-        this.carService.addNewCar(newCar).subscribe((resp) => {
-          this.localCarList.push(resp.car);
-          this.carService.carsList.next(this.localCarList);  
+        this.carService.addNewCar(newCar).subscribe({
+          next: (resp) => {
+            this.localCarList.push(resp.car)
+            this.carService.carsList.next(this.localCarList);
+            Swal.fire({
+              icon: 'success',
+              title: 'Car has been saved',
+              showConfirmButton: false,
+              timer: 1500,
+            });
+            this.newCarForm.reset();
+          },
+          error: ({error}) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: `${error.errors[0].msg}`,
+            });
+          }
         })
       )
     }
     this.localCarList.length >= 1
       ? this.carService.isCarsListEmpty.next(false)
       : this.carService.isCarsListEmpty.next(true);
-    this.newCarForm.reset();
   }
+
+  
 
   onNoClick() {
     this.dialogRef.close();
