@@ -24,7 +24,6 @@ export class HomeComponent implements OnInit, OnDestroy{
         ? this.carService.isCarsListEmpty.next(false)
         : this.carService.isCarsListEmpty.next(true);
       this.isCarListEmpty = this.carService.isCarsListEmpty;
-      console.log(this.isCarListEmpty);
     });
   }
 
